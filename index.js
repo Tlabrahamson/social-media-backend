@@ -1,6 +1,9 @@
 const express = require("express");
 const mongoose = require("mongoose");
+const bodyParser = require("body-parser");
 const cors = require("cors");
+const fs = require("fs");
+const path = require("path");
 require("dotenv").config();
 
 // Set up express
@@ -31,3 +34,4 @@ mongoose.connect(
 // Set up routes
 
 app.use("/users", require("./routes/userRouter"));
+app.use("/uploads", express.static("uploads"));

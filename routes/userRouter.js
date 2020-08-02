@@ -3,12 +3,13 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const auth = require("../middleware/auth");
 const User = require("../models/userModel");
+const multer = require("multer");
 
 // Register route
 
 router.post("/register", async (req, res) => {
   try {
-    let { email, password, passwordCheck, displayName } = req.body;
+    let { email, password, passwordCheck, displayName, userBio } = req.body;
 
     // Validation
 
@@ -37,7 +38,8 @@ router.post("/register", async (req, res) => {
     const newUser = new User({
       email,
       password: passwordHash,
-      displayName
+      displayName,
+      userBio
     });
 
     const savedUser = await newUser.save();
@@ -72,13 +74,15 @@ router.post("/login", async (req, res) => {
       user: {
         id: user._id,
         displayName: user.displayName,
-        email: user.email
+        userBio: user.userBio
       }
     });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
+
+// Delete User
 
 router.delete("/delete", auth, async (req, res) => {
   try {

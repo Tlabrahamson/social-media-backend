@@ -118,4 +118,18 @@ router.get("/", auth, async (req, res) => {
   });
 });
 
+// Update user
+
+router.get("/edit-profile", auth, async (req, res) => {
+  User.findById(req.params._id).then(update => {
+    update.displayName = req.body.displayName;
+    update.userBio = req.body.userBio;
+
+    update
+      .save()
+      .then(() => res.json("Info updated!"))
+      .catch(err => res.status(400).json("Error" + err));
+  });
+});
+
 module.exports = router;

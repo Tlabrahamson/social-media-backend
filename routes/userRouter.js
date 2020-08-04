@@ -3,7 +3,6 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const auth = require("../middleware/auth");
 const User = require("../models/userModel");
-const multer = require("multer");
 
 // Register route
 
@@ -118,18 +117,21 @@ router.get("/", auth, async (req, res) => {
   });
 });
 
-// Update user
+// Update user profile (Just the displayName and userBio for now)
+router.post("/update", async (req, res) => {
+  try {
+    let id = req.body._id;
+    let profile = {
+      displayName: req.body.displayName,
+      userBio: req.body.userBio
+    };
 
-router.get("/edit-profile", auth, async (req, res) => {
-  User.findById(req.params._id).then(update => {
-    update.displayName = req.body.displayName;
-    update.userBio = req.body.userBio;
-
-    update
-      .save()
-      .then(() => res.json("Info updated!"))
-      .catch(err => res.status(400).json("Error" + err));
-  });
+    User.updateOne(id, profile, (err, profile) => {
+      res.send(profile);
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 module.exports = router;

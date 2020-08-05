@@ -1,5 +1,6 @@
 const router = require("express").Router();
 const bcrypt = require("bcryptjs");
+const multer = require("multer");
 const jwt = require("jsonwebtoken");
 const auth = require("../middleware/auth");
 const User = require("../models/userModel");
@@ -8,7 +9,14 @@ const User = require("../models/userModel");
 
 router.post("/register", async (req, res) => {
   try {
-    let { email, password, passwordCheck, displayName, userBio } = req.body;
+    let {
+      email,
+      password,
+      passwordCheck,
+      displayName,
+      userBio,
+      avatar
+    } = req.body;
 
     // Validation
 
@@ -38,7 +46,8 @@ router.post("/register", async (req, res) => {
       email,
       password: passwordHash,
       displayName,
-      userBio
+      userBio,
+      avatar
     });
 
     const savedUser = await newUser.save();
@@ -73,7 +82,8 @@ router.post("/login", async (req, res) => {
       user: {
         id: user._id,
         displayName: user.displayName,
-        userBio: user.userBio
+        userBio: user.userBio,
+        avatar: user.avatar
       }
     });
   } catch (err) {
@@ -113,17 +123,20 @@ router.get("/", auth, async (req, res) => {
   const user = await User.findById(req.user);
   res.json({
     displayName: user.displayName,
-    id: user._id
+    id: user._id,
+    userBio: user.userBio,
+    avatar: user.avatar
   });
 });
 
-// Update user profile (Just the displayName and userBio for now)
+// Update user profile
 router.post("/update", async (req, res) => {
   try {
     let id = req.body._id;
     let profile = {
       displayName: req.body.displayName,
-      userBio: req.body.userBio
+      userBio: req.body.userBio,
+      avatar: req.body.avatar
     };
 
     User.updateOne(id, profile, (err, profile) => {

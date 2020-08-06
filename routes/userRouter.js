@@ -1,9 +1,26 @@
 const router = require("express").Router();
+const express = require("express");
 const bcrypt = require("bcryptjs");
 const multer = require("multer");
 const jwt = require("jsonwebtoken");
 const auth = require("../middleware/auth");
 const User = require("../models/userModel");
+const path = require("path");
+const helpers = require("../helpers");
+
+// Setup storage
+const app = express();
+app.use(express.static("../public"));
+
+const storage = multer.diskStorage({
+  destination: "../public/uploads/",
+  filename: function(req, file, cb) {
+    cb(
+      null,
+      file.fieldname + "-" + Date.now() + path.extname(file.originalname)
+    );
+  }
+});
 
 // Register route
 
@@ -145,6 +162,33 @@ router.post("/update", async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
+});
+
+// Upload an avatar
+const upload = multer({
+  storage: storage,
+  fileFilter: helpers.imageFilter
+}).single("avatar");
+
+router.post("/upload", async (req, res) => {
+  upload(req, res, err => {
+    if (err) {
+      res.render("index", {
+        msg: err
+      });
+    } else {
+      if (req.file == undefined) {
+        res.render("index", {
+          msg: "Error: No file selected!"
+        });
+      } else {
+        res.render("index", {
+          msg: "File Uploaded!",
+          file: `uploads/${req.file.filename}`
+        });
+      }
+    }
+  });
 });
 
 module.exports = router;
